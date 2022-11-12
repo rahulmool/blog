@@ -39,6 +39,26 @@ By this we have cut down on the limitation that if the number of trees are reall
 The traditional harddisk utilizes only the top part of the disk to read and write. But to provide more storage in the same space Interlaced magnetic recording is Introduced in which it utilizes the bottom part of the disk as well to read and write. The problem with this approach is that after wrtining at the bottom of the disk there is a possibility that the data which was at the top of the disk may be lost. So Read-Modify-Write (RMW) is introduced to rewrite top tracks (if needed) when updating a bottom track: 
 ![alt text](figure4.png "Title")
 
+It was found that when the implementation of LSM-tree storege was implemented in HDD which support Interlaced Magnetic Recording there was a significant drop in write throughput. It's because LSM-tree takes advantage of the sortedness of the data which we do not get in Interlaced Magnetic Recording because for write we have to backup data from top disk then write on bottom disk and then write back on the top disk. To resolve this issue KVIMR is introduced which is a middleware between the Harddisk and the LSM-tree based data structure. It was developed in C++. <br/>
+### Architecure of KVIMR
+![alt text](figure6.png "Title")
+
+KVIMR is provided with the level information of the LSM-tree by which KVIMR provides a compaction aware track allocation to allocate tracks for data of LSM-tree KV store. By which we get
+- Minimized time consuming RMW, when persisting data files of LSM-tree based KV store
+- Efficiently accessing the data files of LSM tree based KV store during the compaction process.
+
+KVIMR contains write Buffer to temporarly hold the SS table. It also contains SSTable to track Map to recall the relationship between SSTable and the check. KVIMR contain 4 handler and provides 4 interface for kv store.
+1. Read Handler - to Read SSTable based on S2TMap
+2. Write Handler - to write SSTable into write buffer
+3. Sync Handler - To Persist buffered SSTables into tracks
+4. Unlink Hanlder - To delte SSTable from S2TMap
+
+Sync Handler Playes most important role in affecting the troubles caused by KV store. Since how to persist the SSW into IMR tracks largely affects the numbe of remote variables. We provide 2 main desing in sync handler to persist the uffer accident into imrchecks by using "level" infromation of SST as a key.
+1. Compaction-aware Track Allocation
+2. Merged Read-Modify-Write
+
+It is obsered that KVIMR achieves significant throughput improvements.
+
 
 
 
