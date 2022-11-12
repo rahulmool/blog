@@ -11,14 +11,7 @@ the memtable and Index are inside the Memory while the SStable persists on disk.
 For every write which comes our way we are going to insert this into a in memory read block tree which is basically giving us the sortedness. It will be sorted on the keys.<br/>
 This table represents the write operations that this database needs to handle.
 
-|Name   |Index|
-|-------|-----|
-| Aman  | 200 |
-| Ram   | 700 |
-| Ankit | 320 |
-| Aman  | 220 |
-| Rohan | 133 |
-| Sumit | 222 | 
+![alt text](figure7.png "Title")
 
 The value of this table is then pushed to an self balancing avl tree so the height of the tree will always be log(n). <br/>
 This is nothing but the mem table portion we are talking about.
